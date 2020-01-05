@@ -89,8 +89,8 @@ print ("------------------------------------------------------------------------
 
 
 """ Training Model"""
-n_iterations = 25
-n_max_steps = 100
+n_iterations = 250
+n_max_steps = 1000
 n_games_per_update = 10
 save_iterations = 10
 discount_rate = 0.95
@@ -116,7 +116,8 @@ with tf.Session() as sess:
 					break
 			all_rewards.append(current_rewards)
 			all_gradients.append(current_gradients)
-			
+		
+		env.render()	
 		# At this point we have run the policy for 10 episodes, and we are
 		# ready for a policy update using the algorithm described earlier.
 		all_rewards = discount_and_normalize_rewards(all_rewards,discount_rate)
