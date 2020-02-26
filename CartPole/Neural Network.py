@@ -1,3 +1,6 @@
+"""
+The following code utilises TesnsorFlow 1.x
+"""
 import gym
 import numpy as np
 import tensorflow as tf
