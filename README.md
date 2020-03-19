@@ -1,5 +1,5 @@
 # Reinforcement-Learning
 
-### Cart Pole Problem
+## CartPole Problem
 
 Balancing a rod on the top of a cart by moving the cart.
