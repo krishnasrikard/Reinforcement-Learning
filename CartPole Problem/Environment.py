@@ -25,10 +25,10 @@ def basic_policy(obs):
 	return 0 if angle < 0 else 1
 
 totals = []
-for episode in range(500):
+for episode in range(5000):
 	episode_rewards = 0
 	obs = env.reset()
-	for step in range(1000): # 1000 steps max, we don't want to run forever
+	for step in range(10000): # 1000 steps max, we don't want to run forever
 		action = basic_policy(obs)
 		obs, reward, done, info = env.step(action)
 		episode_rewards += reward
