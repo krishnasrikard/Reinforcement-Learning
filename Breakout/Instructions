@@ -1,0 +1,3 @@
+- Install ROMS from http://www.atarimania.com/rom_collection_archive_atari_2600_roms.html
+- Extract Roms.rar to Roms Folder and them extract ROMS.zip in it.
+- The run the command ```python3 -m atari_py.import_roms "/home/krishna/Roms/ROMS"``` "/home/krishna/Roms/ROMS" is the directory ofthe folder.
