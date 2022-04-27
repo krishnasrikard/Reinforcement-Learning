@@ -10,13 +10,15 @@ import tensorflow as tf
 from DQN import Create_DQN
 import warnings
 warnings.filterwarnings("ignore")
-
+import ale_py
+from tqdm import tqdm,trange
 
 # Creating Environment
-env = gym.make("Breakout-v4")
+env = gym.make("Breakout-v0")
 env = gym.wrappers.ResizeObservation(env, (84, 84))
 env = gym.wrappers.GrayScaleObservation(env)
 env = gym.wrappers.FrameStack(env, 4)
+print ()
 
 # No.of Actions
 NumActions = 4
@@ -38,7 +40,7 @@ min_epsilon = 0.1
 max_epsilon = 1.0
 
 # Training Parameters
-Episodes = 250							# No.of Episodes
+Episodes = 1000							# No.of Episodes
 TimeSteps = 10000						# Each Episode has a maximum of 1000 TimeSteps
 Batch_Size = 32							# Batch_Size from reply buffer
 
@@ -63,12 +65,11 @@ for episode in range(Episodes):
 	state = np.array(env.reset())
 	episode_reward = 0
 
-	for t in range(TimeSteps):
+	for t in tqdm(range(1,TimeSteps), desc="Episode-"+str(episode)):
 		# env.render()
 
 		frame_count +=1
-		print ("Frame Count = {}".format(frame_count))
-
+		
 		if frame_count < random_frames:
 			action = np.random.choice(NumActions)
 		else:
@@ -80,9 +81,9 @@ for episode in range(Episodes):
 				action = np.random.choice(NumActions)
 			else:
 				# Greedy Step => Perform Action with most Q-Value
-				action_probabilities = Model(np.expand_dims(state,axis=0))
-				action = tf.argmax(action_probabilities)
-		
+				action_probabilities = Model.predict(np.expand_dims(state,axis=0))[0]
+				action = np.argmax(action_probabilities)
+
 		# Epsilon-Decay with increase of no.of Frames => Decaying Probability of Random Action
 		epsilon -= (max_epsilon - min_epsilon)/greedy_frames
 		epsilon = max(epsilon, min_epsilon)
@@ -100,6 +101,7 @@ for episode in range(Episodes):
 		Replay["next_state"].append(next_state)
 		Replay["reward"].append(reward)
 		Replay["done"].append(done)
+		state = next_state
 
 		# Size of Memory
 		Memory_Size = len(Replay["state"])
@@ -137,11 +139,11 @@ for episode in range(Episodes):
 			# Masks of Actions
 			Masks = tf.one_hot(Action_Samples, NumActions)
 
-			with tf.GradientTape as tape:
-				# Q(s,TargetModel)
+			with tf.GradientTape() as tape:
+				# Q(s,Model)
 				Q_Values = Model(State_Samples)
 
-				# Q(s,a,TargetModel)
+				# Q(s,a,Model)
 				y_pred = tf.reduce_sum(tf.multiply(Q_Values, Masks), axis=1)
 
 				# Loss
@@ -155,7 +157,8 @@ for episode in range(Episodes):
 		# Updating Target Model
 		if frame_count % Steps_per_TargetModel_Update == 0:
 			Target_Model.set_weights(Model.get_weights())
-			print ("Mean Episode Reward = {},	No.of Episodes = {},	No.of Frames = {}".format(np.mean(Episodes_Rewards), epoch, frame_count))
+			Model.save("Model.h5")
+			print ("Updating Traget Model: Mean Episode Reward = {},	No.of Episodes = {},	No.of Frames = {} \n".format(np.mean(Episodes_Rewards), t, frame_count))
 
 
 		# Checking Memory
@@ -181,4 +184,4 @@ for episode in range(Episodes):
 		break
 
 
-	print ("Episode-" + str(episode) + ":	Episode-Reward = " + str(episode_reward))
+	print ("Episode-" + str(episode) + ": Episode-Reward = " + str(episode_reward) + "\n")
